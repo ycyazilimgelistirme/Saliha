@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Bir Sorum Var...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Sayfa kaydırmayı engelle */
+        }
+        .font-pacifico {
+            font-family: 'Pacifico', cursive;
+        }
+        .page {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .page.active {
+            display: flex;
+            opacity: 1;
+        }
+        /* Butonların büyüme animasyonu için */
+        .btn-yes {
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-no {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Konfeti için stil */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+            border-radius: 50%;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-pink-100">
+
+    <div id="app" class="relative w-full h-screen flex items-center justify-center">
+
+        <!-- Sayfa 1: İlk Soru -->
+        <div id="page-1" class="page active flex-col items-center justify-center text-center p-4">
+            <img src="https://media1.tenor.com/m/Sl4cd19anTUAAAAC/transparent-love.gif" alt="Sevimli Karakter" class="w-48 h-48 md:w-64 md:h-64 object-cover shadow-lg mb-8 rounded-lg">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-8 font-pacifico">Seni Seviyorum, Ne Dersin?</h1>
+            <div class="flex gap-4">
+                <button onclick="showSuccess()" class="btn-yes bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg">Evet</button>
+                <button onclick="nextPage(2)" class="btn-no bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg">Hayır</button>
+            </div>
+        </div>
+
+        <!-- Sayfa 2-7: Israr Sayfaları (JavaScript ile yönetilecek) -->
+        <div id="page-insist" class="page flex-col items-center justify-center text-center p-4">
+            <img id="insist-gif" src="https://media1.tenor.com/m/J2oyRwRylF0AAAAC/tonton-heart-running.gif" alt="Israrcı Karakter" class="w-48 h-48 md:w-64 md:h-64 object-cover shadow-lg mb-8 rounded-lg">
+            <h1 id="insist-text" class="text-3xl md:text-5xl font-bold text-gray-800 mb-8 font-pacifico">Ama Gerçekten Çok Seviyorum!</h1>
+            <div class="flex items-center gap-4">
+                <button id="yes-btn" onclick="showSuccess()" class="btn-yes bg-green-500 hover:bg-green-600 text-white font-bold rounded-full shadow-lg">Evet</button>
+                <button id="no-btn" onclick="handleNoClick()" class="btn-no bg-red-500 hover:bg-red-600 text-white font-bold rounded-full shadow-lg">Hayır</button>
+            </div>
+        </div>
+
+
+        <!-- Başarı Sayfası -->
+        <div id="page-success" class="page flex-col items-center justify-center text-center p-4 bg-gradient-to-br from-pink-300 to-purple-300">
+             <div id="confetti-container" class="absolute top-0 left-0 w-full h-full overflow-hidden"></div>
+            <img src="https://media1.tenor.com/m/gotOLnyvy4YAAAAC/bubu-dancing-dance.gif" alt="Mutlu Çift" class="w-64 h-64 md:w-80 md:h-80 object-cover shadow-2xl mb-8 rounded-lg">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 font-pacifico">Biliyordum! Dünyanın En Mutlu İnsanı Yaptın Beni!</h1>
+            <p class="text-white text-xl">❤️❤️❤️</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Sayfa geçişlerini yöneten durum değişkenleri
+        let currentPage = 1;
+        let noClickCount = 0;
+        
+        // Israr mesajları ve GIF'ler
+        const insistMessages = [
+            "Ama gerçekten çok seviyorum!",
+            "Lütfen bir şans ver...",
+            "Emin misin? Bence çok yakışırız.",
+            "Bak kalbim kırılıyor...",
+            "Son kararın mı? :(",
+            "Hayır butonu bozuldu galiba?",
+            "Tek seçenek bu kaldı sanırım :)"
+        ];
+        
+        const insistGifs = [
+            "https://media.tenor.com/SJgzn3gVR98AAAAj/pengu-pudgy.gif", // Yalvaran penguen
+            "https://media.tenor.com/L3CLvSEIKd0AAAAj/love-you-love.gif", // Öpücük
+            "https://media1.tenor.com/m/J2oyRwRylF0AAAAC/tonton-heart-running.gif", // Kalp yapan kedi (DEĞİŞTİRİLDİ)
+            "https://media.tenor.com/PMteFQZzWyYAAAAj/cute-love-you.gif", // Sevimli
+            "https://media.tenor.com/tO85mO366xYAAAAj/amore-love-you.gif", // Amore yazısı
+            "https://media.tenor.com/76BaX0eo304AAAAi/kitty-kitty-heart.gif", // Kalpli kedi
+            "https://media.tenor.com/SJgzn3gVR98AAAAj/pengu-pudgy.gif" // Tekrar Yalvaran penguen
+        ];
+
+        // Butonların başlangıç boyutları
+        let yesButtonPaddingX = 32;
+        let yesButtonPaddingY = 12;
+        let yesButtonFontSize = 18;
+        
+        let noButtonPaddingX = 32;
+        let noButtonPaddingY = 12;
+        let noButtonFontSize = 18;
+
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+
+        // Sayfa değiştirme fonksiyonu
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        // Bir sonraki ısrar sayfasına geçiş
+        function nextPage(pageNumber) {
+            currentPage = pageNumber;
+            updateInsistPage();
+            showPage('page-insist');
+        }
+        
+        // Hayır butonuna tıklandığında
+        function handleNoClick() {
+            noClickCount++;
+            if (noClickCount < insistMessages.length) {
+                updateInsistPage();
+            }
+        }
+        
+        // Israr sayfasını güncelleme (mesaj, gif, buton boyutları)
+        function updateInsistPage() {
+            // Buton boyutlarını ayarla
+            yesButtonPaddingX += 20;
+            yesButtonPaddingY += 10;
+            yesButtonFontSize += 4;
+            
+            noButtonPaddingX = Math.max(8, noButtonPaddingX - 6);
+            noButtonPaddingY = Math.max(4, noButtonPaddingY - 3);
+            noButtonFontSize = Math.max(8, noButtonFontSize - 2);
+
+            yesBtn.style.padding = `${yesButtonPaddingY}px ${yesButtonPaddingX}px`;
+            yesBtn.style.fontSize = `${yesButtonFontSize}px`;
+            
+            noBtn.style.padding = `${noButtonPaddingY}px ${noButtonPaddingX}px`;
+            noBtn.style.fontSize = `${noButtonFontSize}px`;
+
+            const messageIndex = Math.min(noClickCount, insistMessages.length - 1);
+            document.getElementById('insist-text').textContent = insistMessages[messageIndex];
+            document.getElementById('insist-gif').src = insistGifs[messageIndex];
+
+            // Son aşamada "Hayır" butonunu gizle
+            if (noClickCount === insistMessages.length - 1) {
+                noBtn.style.display = 'none';
+                // Evet butonunu ekranı kaplayacak şekilde büyüt
+                yesBtn.classList.add('w-screen', 'h-screen', 'fixed', 'top-0', 'left-0', 'text-6xl', 'rounded-none');
+            }
+        }
+
+        // Başarı sayfasını göster
+        function showSuccess() {
+            showPage('page-success');
+            createConfetti();
+        }
+        
+        // Konfeti animasyonu
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#4caf50', '#ffeb3b'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.width = (Math.random() * 8 + 8) + 'px';
+                confetti.style.height = confetti.style.width;
+                container.appendChild(confetti);
+            }
+        }
+
+        // İlk sayfanın butonlarını ayarla
+        document.addEventListener("DOMContentLoaded", () => {
+             yesBtn.style.padding = `${yesButtonPaddingY}px ${yesButtonPaddingX}px`;
+             yesBtn.style.fontSize = `${yesButtonFontSize}px`;
+             noBtn.style.padding = `${noButtonPaddingY}px ${noButtonPaddingX}px`;
+             noBtn.style.fontSize = `${noButtonFontSize}px`;
+        });
+    </script>
+</body>
+</html>
+
